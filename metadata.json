@@ -1,0 +1,7 @@
+{
+  "name": "Core Clear Construction Portal",
+  "description": "Premium read-only construction project tracking portal for clients, featuring real-time progress, financial summaries, and project roadmaps.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
