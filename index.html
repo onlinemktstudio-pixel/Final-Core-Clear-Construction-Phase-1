@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -9,48 +10,362 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Sarabun', sans-serif;
-            background-color: #f8fafc;
-            color: #1e293b;
-        }
-        .animate-pulse-orange {
-            animation: pulse-orange 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-        @keyframes pulse-orange {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: .7; transform: scale(1.1); }
-        }
-        .custom-shadow {
-            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
-        }
+        body { font-family: 'Sarabun', sans-serif; background-color: #f8fafc; color: #1e293b; margin: 0; padding: 0; }
+        .animate-pulse-orange { animation: pulse-orange 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse-orange { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .7; transform: scale(1.1); } }
+        .custom-shadow { box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05); }
         .gold-text {
             background: linear-gradient(45deg, #d4af37, #f9e29c, #b8860b);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 800;
-            filter: drop-shadow(0 2px 4px rgba(212, 175, 55, 0.5));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            font-weight: 800; filter: drop-shadow(0 2px 4px rgba(212, 175, 55, 0.5));
         }
-        .scrollbar-hide::-webkit-scrollbar {
-            display: none;
-        }
-        .scrollbar-hide {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
-<script type="importmap">
+    <script type="importmap">
 {
   "imports": {
-    "react": "https://esm.sh/react@^19.2.3",
+    "react": "https://esm.sh/react@19.0.0",
+    "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
+    "lucide-react": "https://esm.sh/lucide-react@0.460.0",
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "lucide-react": "https://esm.sh/lucide-react@^0.562.0"
+    "react/": "https://esm.sh/react@^19.2.3/"
   }
 }
 </script>
 </head>
 <body>
     <div id="root"></div>
+
+    <script type="module">
+        import React, { useState, useMemo } from 'react';
+        import { createRoot } from 'react-dom/client';
+        import { 
+            LayoutDashboard, Wallet, BarChart3, CalendarRange, UserCircle, 
+            Bell, Video, Youtube, TrendingUp, Target, Box, Filter, 
+            Coins, Hammer, Layers, TrendingDown, Info, CheckCircle2, 
+            Clock, Calendar, User, MapPin, Phone, Mail, FileText, Download, ShieldCheck, Briefcase, X 
+        } from 'lucide-react';
+
+        // --- CONSTANTS ---
+        const PROJECT_INFO = {
+            name: 'The Grand Residence Ratchapruek',
+            value: 12500000,
+            cumulativeExpense: 4850000,
+            progress: 45
+        };
+
+        const MOCK_TRANSACTIONS = [
+            { id: '1', date: '30 ธันวาคม 2568', description: 'ค่าวัสดุก่อสร้างเบื้องต้น', amount: 9525, category: 'วัสดุ', images: ['https://i.postimg.cc/90cg2L5r/1767332517752.jpg'] },
+            { id: '2', date: '30 ธันวาคม 2568', description: 'ค่าไฟฟ้าประจำหน่วยงาน', amount: 20000, category: 'อื่นๆ', images: ['https://i.postimg.cc/gJVt1f7M/1767332482116.jpg'] },
+            { id: '3', date: '30 ธันวาคม 2568', description: 'ค่าวัสดุจาก Home Pro', amount: 454.93, category: 'วัสดุ', images: ['https://i.postimg.cc/rFnZ6Gfg/1767332517397.jpg'] },
+            { id: '4', date: '30 ธันวาคม 2568', description: 'ค่าวัสดุจาก Home Pro (ชุดที่ 2)', amount: 7592.98, category: 'วัสดุ', images: ['https://i.postimg.cc/pXGcNQss/1767332517555.jpg', 'https://i.postimg.cc/zXt2mwx7/1767332517652.jpg'] },
+            { id: '5', date: '30 ธันวาคม 2568', description: 'ค่าวัสดุจิปาถะ', amount: 500, category: 'วัสดุ', images: ['https://i.postimg.cc/tCSv0dB2/1767332517923.jpg'] }
+        ];
+
+        const MOCK_TASKS = [
+            { id: 't1', name: 'งานเสาเข็ม', progress: 100, images: ['https://i.postimg.cc/0NmVJT9K/1767332531666.jpg', 'https://i.postimg.cc/d1jn5G7g/1767332488132.jpg', 'https://i.postimg.cc/k4vwTWVZ/1767332492897.jpg'] },
+            { id: 't2', name: 'งานโครงสร้าง', progress: 85, images: ['https://i.postimg.cc/63fzMC2s/1767332488296.jpg', 'https://i.postimg.cc/rmNgf5d3/1767332487930.jpg', 'https://i.postimg.cc/d1jn5G7x/1767332492717.jpg'] },
+            { id: 't3', name: 'งานหลังคา', progress: 0, images: [] },
+            { id: 't4', name: 'งานก่ออิฐฉาบปูน', progress: 0, images: [] }
+        ];
+
+        const ROADMAP_DATA = [
+            { id: 'r1', task: 'งานปรับพื้นที่และเสาเข็ม', days: 45, start: '01/01/2568', end: '15/02/2568', status: 'COMPLETED' },
+            { id: 'r2', task: 'งานฐานรากและคานคอดิน', days: 30, start: '16/02/2568', end: '18/03/2568', status: 'COMPLETED' },
+            { id: 'r3', task: 'งานโครงสร้างเสาและคานชั้น 1', days: 60, start: '19/03/2568', end: '19/05/2568', status: 'IN_PROGRESS' },
+            { id: 'r4', task: 'งานโครงสร้างชั้น 2', days: 60, start: '20/05/2568', end: '20/07/2568', status: 'PENDING' }
+        ];
+
+        // --- COMPONENTS ---
+        const Header = () => (
+            <header className="h-20 bg-[#25477a] flex items-center justify-between px-6 md:px-10 sticky top-0 z-10 shadow-md">
+                <div className="flex items-center gap-3">
+                    <img src="https://i.postimg.cc/PqZWmdfT/Core-Clearff-Photoroom.png" className="w-10 h-10 brightness-0 invert" alt="logo" />
+                    <div>
+                        <span className="gold-text text-xl block leading-none">Core Clear</span>
+                        <span className="text-[10px] text-white/70 tracking-widest block font-bold uppercase">Construction</span>
+                    </div>
+                </div>
+                <div className="flex items-center gap-4">
+                    <button className="relative p-2 text-white/80 hover:text-white hidden md:block"><Bell size={22} /></button>
+                    <div className="w-10 h-10 rounded-full border-2 border-white/20 overflow-hidden shadow-inner">
+                        <img src="https://picsum.photos/id/64/100/100" className="w-full h-full object-cover" alt="user" />
+                    </div>
+                </div>
+            </header>
+        );
+
+        const Sidebar = ({ activePage, onPageChange }) => {
+            const navItems = [
+                { id: 'DASHBOARD', label: 'ภาพรวม', icon: LayoutDashboard },
+                { id: 'FINANCE', label: 'การเงิน', icon: Wallet },
+                { id: 'PROGRESS', label: 'ความคืบหน้า', icon: BarChart3 },
+                { id: 'ROADMAP', label: 'แผนงาน', icon: CalendarRange },
+                { id: 'PROFILE', label: 'โปรไฟล์', icon: UserCircle },
+            ];
+            return (
+                <div className="w-72 h-full bg-[#25477a] hidden md:flex flex-col p-6 text-white shrink-0">
+                    <div className="mb-10 flex items-center gap-3">
+                        <img src="https://i.postimg.cc/PqZWmdfT/Core-Clearff-Photoroom.png" className="w-12 h-12 brightness-0 invert" alt="logo" />
+                        <div>
+                            <div className="gold-text text-2xl tracking-tight">Core Clear</div>
+                            <div className="text-[11px] font-bold tracking-[0.25em] opacity-80 uppercase">Construction</div>
+                        </div>
+                    </div>
+                    <nav className="flex-1 space-y-2">
+                        {navItems.map((item) => {
+                            const Icon = item.icon;
+                            return (
+                                <button key={item.id} onClick={() => onPageChange(item.id)} className={`w-full flex items-center gap-4 px-4 py-4 rounded-2xl transition-all ${activePage === item.id ? 'bg-white/10 shadow-lg text-white font-bold' : 'text-white/60 hover:bg-white/5'}`}>
+                                    <Icon size={24} /> <span className="text-lg">{item.label}</span>
+                                </button>
+                            );
+                        })}
+                    </nav>
+                </div>
+            );
+        };
+
+        const BottomNav = ({ activePage, onPageChange }) => {
+            const items = [
+                { id: 'DASHBOARD', icon: LayoutDashboard, label: 'สรุป' },
+                { id: 'FINANCE', icon: Wallet, label: 'เงิน' },
+                { id: 'PROGRESS', icon: BarChart3, label: 'งาน' },
+                { id: 'ROADMAP', icon: CalendarRange, label: 'แผน' },
+                { id: 'PROFILE', icon: UserCircle, label: 'ฉัน' },
+            ];
+            return (
+                <div className="fixed bottom-0 left-0 right-0 md:hidden bg-white/90 backdrop-blur-lg border-t border-slate-200 px-2 py-3 flex justify-around items-center z-50 rounded-t-3xl shadow-lg">
+                    {items.map((item) => {
+                        const Icon = item.icon;
+                        return (
+                            <button key={item.id} onClick={() => onPageChange(item.id)} className={`flex flex-col items-center gap-1 min-w-[64px] ${activePage === item.id ? 'text-[#25477a]' : 'text-slate-400'}`}>
+                                <div className={`p-2 rounded-xl ${activePage === item.id ? 'bg-[#25477a]/10' : ''}`}><Icon size={24} /></div>
+                                <span className="text-[11px] font-medium">{item.label}</span>
+                            </button>
+                        );
+                    })}
+                </div>
+            );
+        };
+
+        const ImageViewer = ({ url, onClose }) => (
+            <div className="fixed inset-0 z-[9999] bg-black/95 flex items-center justify-center p-4" onClick={onClose}>
+                <button className="absolute top-6 right-6 text-white p-2 bg-white/10 rounded-full hover:bg-white/20"><X size={32} /></button>
+                <img src={url} className="max-w-full max-h-full object-contain rounded-lg shadow-2xl" onClick={e => e.stopPropagation()} />
+            </div>
+        );
+
+        // --- PAGES ---
+        const Dashboard = ({ onImageClick }) => (
+            <div className="space-y-6">
+                <div className="px-2">
+                    <h1 className="text-xl md:text-2xl font-bold text-slate-800">{PROJECT_INFO.name}</h1>
+                    <p className="text-slate-400 text-xs md:text-sm">รายงานสถานะปัจจุบัน</p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-[#25477a] text-white rounded-[28px] p-6 shadow-xl relative overflow-hidden">
+                        <div className="absolute top-6 right-6 opacity-10"><Box size={40} /></div>
+                        <p className="text-white/60 text-[10px] font-bold uppercase tracking-widest mb-1">ค่าใช้จ่ายสะสม</p>
+                        <h2 className="text-2xl md:text-3xl font-black mb-1">฿{PROJECT_INFO.cumulativeExpense.toLocaleString()}</h2>
+                        <div className="bg-white/10 rounded-full h-1.5 w-full mt-4"><div className="bg-gradient-to-r from-[#d4af37] to-[#f9e29c] h-full rounded-full" style={{ width: '45%' }}></div></div>
+                    </div>
+                    <div className="bg-white rounded-[28px] p-6 custom-shadow border border-slate-50 relative overflow-hidden">
+                        <div className="absolute top-6 right-6 text-[#25477a]/10"><Target size={40} /></div>
+                        <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">ความคืบหน้า</p>
+                        <h2 className="text-2xl md:text-3xl font-black text-[#25477a] mb-1">{PROJECT_INFO.progress}%</h2>
+                        <div className="bg-slate-100 rounded-full h-1.5 w-full mt-4"><div className="bg-emerald-500 h-full rounded-full" style={{ width: `${PROJECT_INFO.progress}%` }}></div></div>
+                    </div>
+                </div>
+                <div className="bg-white rounded-[28px] p-6 custom-shadow">
+                    <h3 className="text-lg font-bold mb-4">รูปภาพความคืบหน้าล่าสุด</h3>
+                    <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+                        {MOCK_TASKS.flatMap(t => t.images).slice(0, 5).map((img, i) => (
+                            <img key={i} src={img} className="w-32 h-32 md:w-48 md:h-48 object-cover rounded-2xl cursor-pointer hover:scale-105 transition-transform" onClick={() => onImageClick(img)} />
+                        ))}
+                    </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-white rounded-[28px] p-5 custom-shadow flex items-center gap-4 border border-slate-50">
+                        <div className="p-3 bg-blue-50 text-[#25477a] rounded-xl"><Video size={24} /></div>
+                        <div className="flex-1">
+                            <h4 className="font-bold text-sm">กล้องวงจรปิด (Live)</h4>
+                            <a href="https://play.google.com/store/apps/details?id=com.yoosee" target="_blank" className="text-[10px] text-[#25477a] font-bold underline">คลิกเพื่อดูภาพสด</a>
+                        </div>
+                    </div>
+                    <div className="bg-white rounded-[28px] p-5 custom-shadow flex items-center gap-4 border border-slate-50">
+                        <div className="p-3 bg-red-50 text-red-600 rounded-xl"><Youtube size={24} /></div>
+                        <div className="flex-1">
+                            <h4 className="font-bold text-sm">เกร็ดความรู้สร้างบ้าน</h4>
+                            <a href="https://www.youtube.com" target="_blank" className="text-[10px] text-red-600 font-bold underline">คลิกเพื่อรับชม</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const Finance = ({ onImageClick }) => (
+            <div className="space-y-6">
+                <div className="bg-[#25477a] text-white rounded-[32px] p-10 shadow-2xl text-center relative overflow-hidden">
+                    <div className="absolute inset-0 opacity-10 bg-[url('https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?q=80&w=1600')] bg-cover"></div>
+                    <div className="relative z-10">
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-white/60">ยอดสะสมรวมโครงการ</span>
+                        <h2 className="text-4xl md:text-5xl font-black mt-2">฿{PROJECT_INFO.cumulativeExpense.toLocaleString()}</h2>
+                    </div>
+                </div>
+                <div className="bg-white rounded-[32px] overflow-hidden custom-shadow">
+                    <div className="p-6 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
+                        <h3 className="font-bold text-slate-800">รายการเดินบัญชีล่าสุด</h3>
+                        <Filter size={18} className="text-slate-400" />
+                    </div>
+                    <div className="divide-y divide-slate-100">
+                        {MOCK_TRANSACTIONS.map(tx => (
+                            <div key={tx.id} className="p-6 hover:bg-slate-50 transition-colors">
+                                <div className="flex justify-between items-start mb-4">
+                                    <div>
+                                        <span className={`text-[8px] px-2 py-1 rounded-full font-bold text-white uppercase ${tx.category === 'วัสดุ' ? 'bg-blue-600' : 'bg-orange-600'}`}>{tx.category}</span>
+                                        <h4 className="font-bold text-sm text-slate-700 mt-2">{tx.description}</h4>
+                                        <p className="text-[10px] text-slate-400 mt-0.5">{tx.date}</p>
+                                    </div>
+                                    <p className="text-xl font-black text-red-600 italic">-{tx.amount.toLocaleString()}</p>
+                                </div>
+                                <div className="flex gap-2 overflow-x-auto pb-1">
+                                    {tx.images.map((img, idx) => (
+                                        <img key={idx} src={img} className="w-20 h-20 rounded-xl cursor-pointer border-2 border-slate-100" onClick={() => onImageClick(img)} />
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+
+        const Progress = ({ onImageClick }) => (
+            <div className="space-y-6">
+                <div className="bg-[#25477a] text-white rounded-[32px] p-10 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div>
+                        <h2 className="text-2xl font-black">ความคืบหน้าโครงการ</h2>
+                        <p className="text-white/60 text-sm mt-1">อัปเดตล่าสุด: 30 ธ.ค. 2568</p>
+                    </div>
+                    <div className="text-center bg-white/10 p-6 rounded-full border border-white/20">
+                        <p className="text-5xl font-black">{PROJECT_INFO.progress}%</p>
+                    </div>
+                </div>
+                {MOCK_TASKS.map(task => (
+                    <div key={task.id} className="bg-white rounded-[28px] p-6 custom-shadow border border-slate-50">
+                        <div className="flex justify-between items-center mb-4">
+                            <h4 className="font-bold text-slate-800">{task.name}</h4>
+                            <span className="text-sm font-black text-[#25477a]">{task.progress}%</span>
+                        </div>
+                        <div className="w-full bg-slate-100 h-2 rounded-full mb-6"><div className="bg-[#25477a] h-full rounded-full" style={{ width: `${task.progress}%` }}></div></div>
+                        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                            {task.images.length > 0 ? task.images.map((img, i) => (
+                                <img key={i} src={img} className="w-28 h-28 object-cover rounded-2xl border border-slate-100" onClick={() => onImageClick(img)} />
+                            )) : <p className="text-xs text-slate-300 italic">ยังไม่มีรูปภาพประกอบ</p>}
+                        </div>
+                    </div>
+                ))}
+            </div>
+        );
+
+        const Roadmap = () => (
+            <div className="space-y-6 pl-4">
+                <div className="bg-[#25477a] text-white rounded-[28px] p-8 mb-8">
+                    <h2 className="text-2xl font-black">แผนการดำเนินงาน</h2>
+                    <p className="text-white/60 text-sm mt-1">Project Roadmap 2568-2569</p>
+                </div>
+                <div className="relative border-l-2 border-slate-200 space-y-8 pl-8">
+                    {ROADMAP_DATA.map(item => (
+                        <div key={item.id} className="relative">
+                            <div className={`absolute left-[-41px] top-1 w-5 h-5 rounded-full border-4 border-white shadow-md ${item.status === 'COMPLETED' ? 'bg-emerald-500' : item.status === 'IN_PROGRESS' ? 'bg-amber-500 animate-pulse' : 'bg-slate-300'}`}></div>
+                            <div className="bg-white p-6 rounded-[24px] custom-shadow border border-slate-50">
+                                <div className="flex justify-between items-start mb-2">
+                                    <h4 className="font-bold text-slate-800">{item.task}</h4>
+                                    <span className="text-[9px] px-2 py-1 rounded-full bg-slate-100 text-slate-400 font-bold uppercase">{item.days} วัน</span>
+                                </div>
+                                <div className="flex items-center gap-4 mt-4 text-[11px] text-slate-400 font-bold">
+                                    <div className="flex items-center gap-1"><Calendar size={12} /> {item.start}</div>
+                                    <div className="flex items-center gap-1"><Calendar size={12} /> {item.end}</div>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+
+        const Profile = () => (
+            <div className="space-y-6">
+                <div className="bg-white rounded-[32px] p-10 text-center custom-shadow border border-slate-50">
+                    <div className="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-[#25477a]/10 overflow-hidden">
+                        <img src="https://picsum.photos/id/64/200/200" className="w-full h-full object-cover" />
+                    </div>
+                    <h2 className="text-2xl font-black text-slate-800">คุณธิติวัฒน์ สิริวรกุล</h2>
+                    <p className="text-slate-400 text-xs mt-1">The Grand Residence Ratchapruek</p>
+                    <div className="mt-4 inline-flex items-center gap-2 bg-emerald-50 text-emerald-600 px-4 py-1.5 rounded-full border border-emerald-100">
+                        <ShieldCheck size={14} /> <span className="text-[10px] font-black uppercase tracking-widest">Client Account Verified</span>
+                    </div>
+                </div>
+                <div className="bg-white rounded-[32px] p-8 custom-shadow border border-slate-50">
+                    <h3 className="font-bold text-slate-800 mb-6">เอกสารโครงการ</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {[
+                            { name: 'สัญญาจ้างก่อสร้าง (PDF)', size: '2.4 MB' },
+                            { name: 'แบบแปลนก่อสร้างอาคาร', size: '18.7 MB' },
+                            { name: 'รายการวัสดุ (BOQ)', size: '1.2 MB' },
+                            { name: 'เอกสารขออนุญาตปลูกสร้าง', size: '3.5 MB' }
+                        ].map((doc, i) => (
+                            <div key={i} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl hover:bg-[#25477a]/5 transition-colors group">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-10 h-10 bg-white shadow-sm flex items-center justify-center rounded-xl text-[#25477a]"><FileText size={20} /></div>
+                                    <div>
+                                        <p className="text-xs font-bold text-slate-700">{doc.name}</p>
+                                        <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">{doc.size}</p>
+                                    </div>
+                                </div>
+                                <button className="p-2 text-slate-300 group-hover:text-[#25477a] transition-colors"><Download size={20} /></button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+
+        // --- APP MAIN ---
+        const App = () => {
+            const [page, setPage] = useState('DASHBOARD');
+            const [selectedImg, setSelectedImg] = useState(null);
+
+            const renderContent = () => {
+                switch(page) {
+                    case 'DASHBOARD': return <Dashboard onImageClick={setSelectedImg} />;
+                    case 'FINANCE': return <Finance onImageClick={setSelectedImg} />;
+                    case 'PROGRESS': return <Progress onImageClick={setSelectedImg} />;
+                    case 'ROADMAP': return <Roadmap />;
+                    case 'PROFILE': return <Profile />;
+                    default: return <Dashboard onImageClick={setSelectedImg} />;
+                }
+            };
+
+            return (
+                <div className="flex h-screen overflow-hidden bg-slate-50">
+                    <Sidebar activePage={page} onPageChange={setPage} />
+                    <div className="flex-1 flex flex-col min-w-0 relative">
+                        <Header />
+                        <main className="flex-1 overflow-y-auto pb-32 md:pb-8 px-4 pt-6 md:px-10">
+                            <div className="max-w-4xl mx-auto">{renderContent()}</div>
+                        </main>
+                        <BottomNav activePage={page} onPageChange={setPage} />
+                    </div>
+                    {selectedImg && <ImageViewer url={selectedImg} onClose={() => setSelectedImg(null)} />}
+                </div>
+            );
+        };
+
+        const root = createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
 </body>
 </html>
