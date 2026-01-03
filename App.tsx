@@ -1,16 +1,15 @@
 
 import React, { useState } from 'react';
-import { Page } from './types';
-import { COLORS } from './constants';
-import Dashboard from './pages/Dashboard';
-import Finance from './pages/Finance';
-import Progress from './pages/Progress';
-import Roadmap from './pages/Roadmap';
-import Profile from './pages/Profile';
-import Sidebar from './components/Sidebar';
-import Header from './components/Header';
-import BottomNav from './components/BottomNav';
-import ImageViewer from './components/ImageViewer';
+import { Page } from './types.ts';
+import Dashboard from './pages/Dashboard.tsx';
+import Finance from './pages/Finance.tsx';
+import Progress from './pages/Progress.tsx';
+import Roadmap from './pages/Roadmap.tsx';
+import Profile from './pages/Profile.tsx';
+import Sidebar from './components/Sidebar.tsx';
+import Header from './components/Header.tsx';
+import BottomNav from './components/BottomNav.tsx';
+import ImageViewer from './components/ImageViewer.tsx';
 
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>(Page.Dashboard);
@@ -29,7 +28,6 @@ const App: React.FC = () => {
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50">
-      {/* Sidebar for Desktop */}
       <div className="hidden md:block">
         <Sidebar activePage={currentPage} onPageChange={setCurrentPage} />
       </div>
@@ -43,7 +41,6 @@ const App: React.FC = () => {
           </div>
         </main>
 
-        {/* Bottom Navigation for Mobile */}
         <div className="md:hidden">
           <BottomNav activePage={currentPage} onPageChange={setCurrentPage} />
         </div>

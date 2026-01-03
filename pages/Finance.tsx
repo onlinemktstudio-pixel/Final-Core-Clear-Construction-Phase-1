@@ -1,166 +1,166 @@
 
 import React, { useState, useMemo } from 'react';
-import { PROJECT_INFO, MOCK_TRANSACTIONS } from '../constants';
-import { Filter, PieChart, Coins, Hammer, Layers, TrendingDown, Wallet } from 'lucide-react';
+import { PROJECT_INFO, MOCK_TRANSACTIONS } from '../constants.tsx';
+import { Wallet, Layers, Hammer, Calendar, Coins, ChevronDown } from 'lucide-react';
 
 interface FinanceProps {
   onImageClick: (url: string) => void;
 }
 
 const Finance: React.FC<FinanceProps> = ({ onImageClick }) => {
-  const uniqueDates = Array.from(new Set(MOCK_TRANSACTIONS.map(tx => tx.date)));
-  const [dateFilter, setDateFilter] = useState(uniqueDates[0]);
+  // ดึงวันที่ทั้งหมดที่มีข้อมูล
+  const uniqueDates = useMemo(() => {
+    const dates = Array.from(new Set(MOCK_TRANSACTIONS.map(tx => tx.date)));
+    return dates.sort((a, b) => {
+      const dayA = parseInt(a.split(' ')[0]);
+      const dayB = parseInt(b.split(' ')[0]);
+      return dayB - dayA;
+    });
+  }, []);
 
-  const filteredTransactions = useMemo(() => {
-    return MOCK_TRANSACTIONS.filter(tx => tx.date === dateFilter);
-  }, [dateFilter]);
+  const [selectedDate, setSelectedDate] = useState(uniqueDates[0]);
+
+  // คำนวณข้อมูลสำหรับวันที่เลือก
+  const dailyTransactions = useMemo(() => {
+    return MOCK_TRANSACTIONS.filter(tx => tx.date === selectedDate);
+  }, [selectedDate]);
 
   const dailyStats = useMemo(() => {
-    const total = filteredTransactions.reduce((acc, curr) => acc + curr.amount, 0);
-    const material = filteredTransactions
-      .filter(tx => tx.category === 'วัสดุ')
-      .reduce((acc, curr) => acc + curr.amount, 0);
-    const labor = filteredTransactions
-      .filter(tx => tx.category === 'แรงงาน')
-      .reduce((acc, curr) => acc + curr.amount, 0);
-    return { total, material, labor };
-  }, [filteredTransactions]);
+    const total = dailyTransactions.reduce((acc, curr) => acc + curr.amount, 0);
+    const materials = dailyTransactions.filter(tx => tx.category === 'วัสดุ').reduce((acc, curr) => acc + curr.amount, 0);
+    const labor = dailyTransactions.filter(tx => tx.category === 'แรงงาน').reduce((acc, curr) => acc + curr.amount, 0);
+    return { total, materials, labor };
+  }, [dailyTransactions]);
+
+  // คำนวณยอดสะสมแยกหมวด (จำลองสัดส่วนตามมาตรฐาน)
+  const cumulativeMaterials = PROJECT_INFO.cumulativeExpense * 0.6;
+  const cumulativeLabor = PROJECT_INFO.cumulativeExpense * 0.4;
 
   return (
-    <div className="space-y-6">
-      {/* Premium Hero Card - Adjusted Typography for Responsive Fit */}
-      <div className="relative overflow-hidden bg-[#25477a] rounded-[32px] p-8 md:p-10 shadow-2xl text-white border-b-8 border-[#1a345c]">
-        {/* Finance-themed background image with overlay */}
-        <div className="absolute inset-0 z-0">
-          <img 
-            src="https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?q=80&w=1600&auto=format&fit=crop" 
-            className="w-full h-full object-cover opacity-20 mix-blend-overlay"
-            alt="finance context"
-          />
-          <div className="absolute inset-0 bg-gradient-to-br from-[#25477a]/90 via-[#25477a]/70 to-[#25477a]/90"></div>
-        </div>
+    <div className="space-y-6 page-enter pb-10">
+      {/* บับเบิ้ลที่ 1: ค่าใช้จ่ายสะสม (สี #25477a - จัดตรงกลาง) */}
+      <div className="bg-[#25477a] text-white rounded-[40px] p-10 shadow-2xl relative overflow-hidden border-b-8 border-[#1a345c]">
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white/10 to-transparent opacity-50"></div>
         
-        <div className="relative z-10 flex flex-col items-center">
-          <div className="flex justify-center items-center gap-2 mb-4 md:mb-6 opacity-90">
-            <Wallet size={16} className="text-white md:w-5 md:h-5" />
-            <span className="text-[10px] md:text-[12px] font-bold uppercase tracking-[0.2em] md:tracking-[0.3em] text-white">สรุปค่าใช้จ่ายสะสมโครงการ</span>
+        <div className="relative z-10 flex flex-col items-center text-center">
+          <div className="flex items-center gap-2 mb-4 opacity-70">
+            <Wallet size={16} className="text-[#d4af37]" />
+            <span className="text-[10px] font-black uppercase tracking-[0.3em]">งบประมาณสะสมทั้งหมด</span>
           </div>
           
-          <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-center mb-8 md:mb-10 tracking-tighter text-white drop-shadow-xl">
-            <span className="mr-1 md:mr-2 italic opacity-80">฿</span>
+          <h2 className="text-4xl md:text-6xl font-black mb-8 tracking-tighter">
+            <span className="text-xl md:text-2xl mr-2 opacity-50 font-light italic">฿</span>
             {PROJECT_INFO.cumulativeExpense.toLocaleString()}
           </h2>
-          
-          <div className="grid grid-cols-2 gap-3 md:gap-5 w-full max-w-xl">
-            <div className="bg-white/15 backdrop-blur-xl rounded-[24px] md:rounded-[28px] p-4 md:p-6 border border-white/20 flex flex-col items-center shadow-lg transition-transform hover:scale-[1.02]">
-              <span className="text-[9px] md:text-[11px] font-bold opacity-70 uppercase mb-1 md:mb-2 text-white tracking-widest">วัสดุสะสม</span>
-              <span className="text-lg md:text-2xl font-black italic text-white">฿{(PROJECT_INFO.cumulativeExpense * 0.65).toLocaleString()}</span>
+
+          <div className="w-full max-w-md grid grid-cols-2 gap-8 border-t border-white/10 pt-8">
+            <div className="flex flex-col items-center">
+              <div className="flex items-center gap-2 text-[#d4af37] mb-2">
+                <Layers size={14} />
+                <p className="text-[10px] font-black uppercase tracking-widest">วัสดุสะสม</p>
+              </div>
+              <p className="text-xl md:text-2xl font-black tracking-tight text-white">฿{cumulativeMaterials.toLocaleString()}</p>
             </div>
-            <div className="bg-white/15 backdrop-blur-xl rounded-[24px] md:rounded-[28px] p-4 md:p-6 border border-white/20 flex flex-col items-center shadow-lg transition-transform hover:scale-[1.02]">
-              <span className="text-[9px] md:text-[11px] font-bold opacity-70 uppercase mb-1 md:mb-2 text-white tracking-widest">แรงงานสะสม</span>
-              <span className="text-lg md:text-2xl font-black italic text-white">฿{(PROJECT_INFO.cumulativeExpense * 0.35).toLocaleString()}</span>
+            <div className="flex flex-col items-center">
+              <div className="flex items-center gap-2 text-[#d4af37] mb-2">
+                <Hammer size={14} />
+                <p className="text-[10px] font-black uppercase tracking-widest">ค่าแรงสะสม</p>
+              </div>
+              <p className="text-xl md:text-2xl font-black tracking-tight text-white">฿{cumulativeLabor.toLocaleString()}</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Daily Summary - Sleek Hierarchy with Scaled Down Total */}
-      <div className="bg-white rounded-[32px] p-6 md:p-8 custom-shadow border border-slate-100">
-        <div className="flex items-center justify-between mb-6 md:mb-8">
-          <div className="flex items-center gap-2 md:gap-3">
-            <div className="p-2 md:p-3 bg-[#25477a]/5 rounded-xl shadow-inner">
-              <TrendingDown size={18} className="text-[#25477a] md:w-5 md:h-5" />
-            </div>
-            <h3 className="font-bold text-slate-800 text-base md:text-lg">สรุปรายจ่ายประจำวัน</h3>
-          </div>
-          <div className="px-4 py-1.5 md:py-2 bg-[#25477a] rounded-full text-[10px] md:text-[12px] font-black text-white shadow-lg tracking-wide">
-            {dateFilter}
-          </div>
-        </div>
-
-        <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-center justify-between bg-slate-50/70 p-6 md:p-8 rounded-[28px] md:rounded-[32px] border border-slate-100">
-          <div className="text-center md:text-left flex-1 md:border-r border-slate-200 md:pr-10">
-            <p className="text-[10px] md:text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 flex items-center justify-center md:justify-start gap-2">
-              <Coins size={14} className="text-[#25477a] md:w-4 md:h-4" />
-              ยอดใช้จ่ายรวมวันนี้
-            </p>
-            <p className="text-3xl md:text-4xl lg:text-5xl font-black text-[#25477a] tracking-tighter">฿{dailyStats.total.toLocaleString()}</p>
-          </div>
-          
-          <div className="flex gap-3 md:gap-4 w-full md:w-auto">
-            <div className="flex-1 bg-white rounded-2xl p-4 md:p-5 border border-slate-100 min-w-[120px] md:min-w-[150px] shadow-sm flex flex-col items-center md:items-start transition-all hover:shadow-md">
-              <div className="flex items-center gap-1.5 mb-1 md:mb-2">
-                <Layers size={12} className="text-blue-600 md:w-3.5 md:h-3.5" />
-                <span className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">ค่าวัสดุ</span>
-              </div>
-              <p className="text-base md:text-2xl font-black text-slate-800 tracking-tight italic">฿{dailyStats.material.toLocaleString()}</p>
-            </div>
-            <div className="flex-1 bg-white rounded-2xl p-4 md:p-5 border border-slate-100 min-w-[120px] md:min-w-[150px] shadow-sm flex flex-col items-center md:items-start transition-all hover:shadow-md">
-              <div className="flex items-center gap-1.5 mb-1 md:mb-2">
-                <Hammer size={12} className="text-orange-600 md:w-3.5 md:h-3.5" />
-                <span className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">ค่าแรง</span>
-              </div>
-              <p className="text-base md:text-2xl font-black text-slate-800 tracking-tight italic">฿{dailyStats.labor.toLocaleString()}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Transaction List */}
-      <div className="bg-white rounded-[32px] overflow-hidden custom-shadow border border-slate-100">
-        <div className="px-6 md:px-8 py-5 md:py-7 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
-          <h3 className="text-base md:text-lg font-bold text-slate-800 tracking-tight">รายการเดินบัญชี</h3>
-          <div className="flex items-center gap-2 bg-white px-3 md:px-5 py-2 md:py-2.5 rounded-xl md:rounded-2xl border border-slate-200 shadow-sm">
-            <Filter size={14} className="text-slate-400" />
+      {/* บับเบิ้ลที่ 2: สรุปค่าใช้จ่ายประจำวัน (สีขาว - จัดตรงกลาง + Dropdown มุมขวา) */}
+      <div className="bg-white rounded-[35px] p-8 shadow-sm border border-slate-100 relative overflow-hidden group">
+        {/* Dropdown Filter มุมขวาบน */}
+        <div className="absolute top-6 right-6 z-20">
+          <div className="relative">
             <select 
-              className="bg-transparent text-[12px] md:text-[14px] text-slate-700 focus:outline-none font-bold cursor-pointer"
-              value={dateFilter}
-              onChange={(e) => setDateFilter(e.target.value)}
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="appearance-none bg-slate-50 border border-slate-200 text-slate-700 text-[10px] font-black py-2 pl-4 pr-9 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#25477a]/20 transition-all cursor-pointer shadow-sm hover:border-[#25477a]/30 uppercase tracking-widest"
             >
               {uniqueDates.map(date => (
                 <option key={date} value={date}>{date}</option>
               ))}
             </select>
+            <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-400">
+              <ChevronDown size={14} />
+            </div>
           </div>
         </div>
 
-        <div className="divide-y divide-slate-100">
-          {filteredTransactions.length > 0 ? filteredTransactions.map((tx) => (
-            <div key={tx.id} className="p-6 md:p-10 hover:bg-slate-50/50 transition-all group">
-              <div className="flex justify-between items-start mb-4 md:mb-5">
+        {/* เนื้อหาหลักประจำวัน - จัดตรงกลาง */}
+        <div className="flex flex-col items-center text-center mt-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Calendar size={14} className="text-[#25477a]" />
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">สรุปค่าใช้จ่ายประจำวัน</p>
+          </div>
+          <h3 className="text-4xl font-black text-[#25477a] tracking-tighter mb-8">฿{dailyStats.total.toLocaleString()}</h3>
+          
+          <div className="w-full max-w-sm grid grid-cols-2 gap-4">
+            <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-50 transition-colors group-hover:bg-white group-hover:shadow-md">
+              <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1">วัสดุวันนี้</p>
+              <p className="text-lg font-bold text-slate-700">฿{dailyStats.materials.toLocaleString()}</p>
+            </div>
+            <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-50 transition-colors group-hover:bg-white group-hover:shadow-md">
+              <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1">ค่าแรงวันนี้</p>
+              <p className="text-lg font-bold text-slate-700">฿{dailyStats.labor.toLocaleString()}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* รายการประจำวัน (ห้ามเปลี่ยน) */}
+      <div className="bg-white rounded-[30px] shadow-sm border border-slate-100 overflow-hidden">
+        <div className="p-6 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
+          <h3 className="font-bold text-slate-800 flex items-center gap-2">
+            <Coins size={18} className="text-[#d4af37]" />
+            รายการธุรกรรม
+          </h3>
+          <span className="text-[10px] font-black text-[#25477a] bg-[#25477a]/5 px-3 py-1 rounded-full uppercase tracking-widest">{selectedDate}</span>
+        </div>
+        
+        <div className="divide-y divide-slate-50">
+          {dailyTransactions.length > 0 ? dailyTransactions.map((tx) => (
+            <div key={tx.id} className="p-6 hover:bg-slate-50/50 transition-colors">
+              <div className="flex justify-between items-start mb-4">
                 <div className="flex-1">
-                  <div className="mb-2 md:mb-3">
-                    <span className={`text-[8px] md:text-[10px] px-3 md:px-4 py-1 md:py-1.5 rounded-full font-black uppercase tracking-[0.1em] shadow-sm ${
-                      tx.category === 'วัสดุ' ? 'bg-blue-600 text-white' : 
-                      tx.category === 'แรงงาน' ? 'bg-orange-600 text-white' : 
-                      'bg-slate-400 text-white'
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className={`text-[9px] px-2 py-0.5 rounded-full font-black uppercase tracking-wider text-white ${
+                      tx.category === 'วัสดุ' ? 'bg-blue-500' : 
+                      tx.category === 'แรงงาน' ? 'bg-orange-500' : 'bg-slate-400'
                     }`}>
                       {tx.category}
                     </span>
                   </div>
-                  <h4 className="font-bold text-slate-700 text-sm md:text-lg leading-snug group-hover:text-[#25477a] transition-colors">{tx.description}</h4>
+                  <h4 className="text-sm md:text-base font-bold text-slate-700 leading-tight">{tx.description}</h4>
                 </div>
                 <div className="text-right ml-4">
-                  <p className="text-xl md:text-3xl font-black text-red-600 tracking-tighter italic">-{tx.amount.toLocaleString()}</p>
+                  <p className="text-lg md:text-xl font-black text-red-500 tracking-tighter">-฿{tx.amount.toLocaleString()}</p>
                 </div>
               </div>
 
               {tx.images.length > 0 && (
-                <div className="flex gap-3 md:gap-4 mt-4 md:mt-5 overflow-x-auto pb-2 scrollbar-hide">
+                <div className="flex gap-3 mt-2 overflow-x-auto pb-1 scrollbar-hide mask-linear-fade">
                   {tx.images.map((img, idx) => (
                     <div 
                       key={idx} 
-                      className="relative w-20 h-20 md:w-28 md:h-28 shrink-0 rounded-[18px] md:rounded-[24px] overflow-hidden border-2 border-slate-100 cursor-pointer shadow-sm hover:shadow-xl hover:border-[#25477a]/20 transition-all duration-300"
+                      className="w-20 h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden border border-slate-100 cursor-pointer hover:scale-105 transition-transform shadow-sm flex-shrink-0"
                       onClick={() => onImageClick(img)}
                     >
-                      <img src={img} alt="receipt" className="w-full h-full object-cover transition-transform duration-500 hover:scale-110" />
+                      <img src={img} alt="receipt" className="w-full h-full object-cover" />
                     </div>
                   ))}
                 </div>
               )}
             </div>
           )) : (
-            <div className="p-16 md:p-24 text-center text-slate-300 italic font-bold bg-slate-50/10 text-xs md:text-sm">ไม่มีรายการบันทึกในวันที่เลือก</div>
+            <div className="py-12 text-center text-slate-400 italic text-sm">
+              ไม่พบรายการในวันที่เลือก
+            </div>
           )}
         </div>
       </div>
